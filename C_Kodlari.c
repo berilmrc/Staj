@@ -1,10 +1,7 @@
-#include <16f877.h> // Kullanýlacak denetleyicinin baþlýk 
- // dosyasý tanýtýlýyor
-#fuses HS, NOWDT, NOPROTECT // Denetleyici konfigürasyon ayarlarý
-#use delay(clock=4000000) // Gecikme fonksiyonu için kullanýlan
- // osilatör frekansý belirtiliyor
-#use fast_io(b) // Port yönlendirme komutlarý B portu için 
-// geçerli
+#include <16f877.h> 
+#fuses HS, NOWDT, NOPROTECT 
+#use delay(clock=4000000) 
+#use fast_io(b)
 int i;
 void main()
 {
@@ -15,23 +12,22 @@ void main()
  setup_timer_0(RTCC_INTERNAL|RTCC_DIV_1);
  setup_timer_1(T1_DISABLED);
  setup_timer_2(T2_DISABLED,0,1);
- set_tris_b(0x00); // B portunun tüm pinlerini çýkýþ olarak ayarla
- output_b(0x00); // B portunun çýkýþlarýný temizle
-
+ set_tris_b(0x00);
+ output_b(0x00); 
  
  for (i=0;i<15;i++)
  {
- output_b(0x0F); // 
- delay_ms(200); // Gecikme
- output_b(0xF0); // 
- delay_ms(200); // Gecikme
+ output_b(0x0F);
+ delay_ms(200);
+ output_b(0xF0);
+ delay_ms(200); 
  }
  for (i=0;i<5;i++)
  {
 output_b(0x55); 
-delay_ms(1000); // Gecikme
+delay_ms(1000);
 output_b(0xAA);
-delay_ms(1000); // Gecikme
+delay_ms(1000);
  }
 }
 
