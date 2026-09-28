@@ -8,7 +8,7 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 * **Hazırlık Haftası:** [Elektronik temelleri]
 * **1. Hafta:** [Şematik okuma + Dijital mantık + C'ye giriş]
 * **2. Hafta:** [C derinleşme + Mikrodenetleyici kavramı + Wokwi]
-* **3. Hafta:** [Wokwi'de Derinleşme — UART ve ADC]
+* **Staj Haftaları** 
 
 ## Klasör Yapısı
 
