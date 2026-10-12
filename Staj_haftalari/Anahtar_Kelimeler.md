@@ -1,0 +1,112 @@
+# Anahtar Kelimeler
+
+Staj sürecindeki çalışma notlarından derlenmiş teknik kavramlar.
+
+## 1. Basınç Kontrol Projesi – Kavramlar
+
+- Basınç
+- Mutlak basınç (absolute)
+- Gösterge basıncı (gauge)
+- Vakum
+- kPa / bar / mbar dönüşümleri
+- Kapalı çevrim kontrol
+- Setpoint (hedef değer)
+- Histerezis
+- Piezorezistif sensör
+- Tam skala (FS) ve %FS
+- Doğruluk (accuracy)
+- Çözünürlük (resolution)
+- Toplam hata bandı (TEB)
+- RS485
+- Half-duplex / full-duplex
+- Diferansiyel sinyal
+- UART / baud rate
+- ADC (analog-dijital çevirici)
+- H-köprüsü
+- PWM / duty cycle
+- Flyback diyot
+- MOSFET / R_DS(on)
+- Lojik seviye MOSFET
+- Düşük / yüksek taraf anahtarlama
+- Pull-down direnci
+- Kalkış akımı (inrush)
+- Brown-out (gerilim çökmesi reseti)
+- Yıldız topraklama
+- Dekuplaj / bulk kondansatör
+- Statik vs dinamik basınç
+- Çek valf
+- Seri / paralel pompa bağlantısı
+- Basınç oranı (sıkıştırma oranı)
+- Aşım (overshoot)
+- Regülatör (lineer)
+- Sigorta
+- Eşik gerilimi V_GS(th)
+- Gate direnci / gate kapasitesi
+- Schottky diyot
+- TO-220 kılıf
+- Delikli plaket / PCB
+- Solenoid valf
+- NC / NO (normalde kapalı / açık)
+- Direkt etkili vs pilot kumandalı valf
+- Orifis
+- Interlock (kilitleme)
+- Röle (COM / NO / NC kontak)
+- Aktif-LOW / aktif-HIGH giriş
+- Jumper (ENA/ENB, 5V)
+- Nihai vakum (ultimate vacuum)
+- Debi (akış hızı)
+
+## 2. STM32 Öğrenme – Kavramlar
+
+- ADC (Analog-to-Digital Converter)
+- ARR (Auto-Reload Register)
+- Bare Metal
+- Bit
+- Blink
+- Breakpoint
+- CCR (Capture/Compare Register)
+- Clock
+- Context Switch
+- CubeMX
+- DMA (Direct Memory Access)
+- Debug
+- Duty Cycle
+- EXTI (External Interrupt)
+- Flash
+- FreeRTOS
+- FSM (Finite State Machine)
+- GPIO (General Purpose Input/Output)
+- GND
+- HAL (Hardware Abstraction Layer)
+- Hertz (Hz)
+- IDE (Integrated Development Environment)
+- Interrupt (Kesme)
+- ISR (Interrupt Service Routine)
+- IWDG (Independent Watchdog)
+- Kesme
+- Kristal (Crystal Oscillator)
+- LD (LED)
+- LL (Low Level Driver)
+- MCU (Microcontroller Unit)
+- MODER (Mode Register)
+- Mutex (Mutual Exclusion)
+- NVIC (Nested Vectored Interrupt Controller)
+- ODR (Output Data Register)
+- OpenOCD
+- PWM (Pulse Width Modulation)
+- Prescaler
+- RAM (Random Access Memory)
+- RCC (Reset and Clock Control)
+- Register
+- RTC (Real Time Clock)
+- Semaphore (Semafor)
+- SPI (Serial Peripheral Interface)
+- SWD (Serial Wire Debug)
+- SysTick
+- Task
+- TIM (Timer)
+- UART (Universal Asynchronous Receiver Transmitter)
+- VDD / VSS
+- Watchdog
+- While(1)
+- XTAL / Crystal
