@@ -21,10 +21,4 @@
 
 ---
 
-## 📖 Kelimeler
-
-Öğrendiğim kelimelerin Türkçe açıklamaları: [Kelimeler.md](Kelimeler.md)
-
----
-
 <div align="center"><sub>⬅️ <a href="../../README.md">Ana sayfaya dön</a></sub></div>
