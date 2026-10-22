@@ -4,7 +4,7 @@
 
 <p><b>Staj sürecinde karşılaştığım teknik terimler, konu gruplarına ayrılmış hâlde</b></p>
 
-<img alt="Grup" src="https://img.shields.io/badge/Grup-11-6f42c1?style=for-the-badge"> <img alt="Keyword" src="https://img.shields.io/badge/Keyword-143-0969da?style=for-the-badge">
+<img alt="Grup" src="https://img.shields.io/badge/Grup-11-6f42c1?style=for-the-badge"> <img alt="Keyword" src="https://img.shields.io/badge/Keyword-144-0969da?style=for-the-badge">
 
 </div>
 
