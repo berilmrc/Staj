@@ -1,8 +1,10 @@
 import cv2
 import numpy as np
 import tkinter as tk
-from tkinter import filedialog
 from PIL import Image, ImageTk
+import os
+import random
+import tkinter.messagebox as messagebox
 
 
 class RenkAyristiriciApp:
@@ -11,21 +13,31 @@ class RenkAyristiriciApp:
         self.root.title("Renk Bazlı Faz Ayrıştırma")
         self.root.geometry("1150x680")
 
-        self.image = None       # Yüklenen (küçültülmüş) BGR görüntü
-        self.hsv = None         # Aynı görüntünün HSV hali
-        self.son_mask = None    # En son hesaplanan ikili maske
+        self.image = None
+        self.hsv = None
+
+        # Ara aşamaları tutacağımız değişkenler (Sunum ve kontrol için)
+        self.son_mask = None
+        self.mask_ham = None
+        self.mask_open = None
+        self.mask_close = None
+
+        # Sabit klasör yolunu tanımlıyoruz
+        self.klasor_yolu = "goruntuler"
+        self.resim_listesi = []
 
         self.build_ui()
+        self.fotograflari_hazirla()
 
     # ==========================================
     # ARAYÜZ KURULUMU
     # ==========================================
     def build_ui(self):
-        # Sol panel: kontroller
         left = tk.Frame(self.root, width=260, padx=12, pady=12)
         left.pack(side=tk.LEFT, fill=tk.Y)
 
-        tk.Button(left, text="Fotoğraf Aç", command=self.dosya_ac).pack(fill=tk.X, pady=5)
+        tk.Button(left, text="🔄 Rastgele Fotoğraf Getir", command=self.rastgele_getir, bg="#d4edda",
+                  font=("Segoe UI", 10, "bold")).pack(fill=tk.X, pady=10)
 
         self.h_var = tk.IntVar(value=20)
         self.tol_var = tk.IntVar(value=15)
@@ -42,7 +54,7 @@ class RenkAyristiriciApp:
         self.oran_label = tk.Label(left, text="Oran: -- %", font=("Segoe UI", 14, "bold"), fg="#1a7a1a")
         self.oran_label.pack(pady=15)
 
-        tk.Button(left, text="Sonucu Kaydet", command=self.kaydet).pack(fill=tk.X, pady=5)
+        tk.Button(left, text="💾 Aşamaları Kaydet & Raporla", command=self.kaydet, bg="#e0e0e0").pack(fill=tk.X, pady=5)
 
         tk.Label(
             left,
@@ -50,7 +62,6 @@ class RenkAyristiriciApp:
             justify=tk.LEFT, fg="gray"
         ).pack(pady=15, anchor=tk.W)
 
-        # Sağ panel: görüntüler
         right = tk.Frame(self.root)
         right.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True)
 
@@ -73,18 +84,35 @@ class RenkAyristiriciApp:
     # ==========================================
     # DOSYA İŞLEMLERİ
     # ==========================================
-    def dosya_ac(self):
-        yol = filedialog.askopenfilename(
-            title="Fotoğraf seç",
-            filetypes=[("Görüntüler", "*.jpg *.jpeg *.png *.bmp")]
-        )
-        if not yol:
-            return
-        img = cv2.imread(yol)
-        if img is None:
+    def fotograflari_hazirla(self):
+        if not os.path.exists(self.klasor_yolu):
+            messagebox.showerror("Hata", f"Klasör bulunamadı. Yolu kontrol edin:\n{self.klasor_yolu}")
             return
 
-        # Ekrana sığması için büyük fotoğrafları küçült
+        gecerli_uzantilar = ('.jpg', '.jpeg', '.png', '.bmp', '.tif')
+        self.resim_listesi = [
+            os.path.join(self.klasor_yolu, f) for f in os.listdir(self.klasor_yolu)
+            if f.lower().endswith(gecerli_uzantilar)
+        ]
+
+        if self.resim_listesi:
+            self.rastgele_getir()
+        else:
+            messagebox.showwarning("Uyarı", "Belirtilen klasörde format uyumlu fotoğraf bulunamadı!")
+
+    def rastgele_getir(self):
+        if not self.resim_listesi:
+            return
+
+        yol = random.choice(self.resim_listesi)
+
+        file_bytes = np.fromfile(yol, dtype=np.uint8)
+        img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+        if img is None:
+            print(f"Hata: {yol} okunamadı.")
+            return
+
         h, w = img.shape[:2]
         if max(h, w) > 520:
             scale = 520 / max(h, w)
@@ -97,15 +125,42 @@ class RenkAyristiriciApp:
     def kaydet(self):
         if self.image is None or self.son_mask is None:
             return
+
+        # Sunum ve kontrol için özel çıktı klasörü oluşturuluyor
+        ciktilar_klasoru = "Asama_Ciktilari"
+        if not os.path.exists(ciktilar_klasoru):
+            os.makedirs(ciktilar_klasoru)
+
+        # 1. Aşama: Orijinal Görüntü
+        cv2.imwrite(os.path.join(ciktilar_klasoru, "01_Orijinal_Mikroyapi.png"), self.image)
+
+        # 2. Aşama: Ham Eşikleme Maskesi (Gürültülü)
+        if self.mask_ham is not None:
+            cv2.imwrite(os.path.join(ciktilar_klasoru, "02_Ham_Renk_Maskesi.png"), self.mask_ham)
+
+        # 3. ve 4. Aşama: Morfolojik Filtreleme Ara Adımları
+        if self.temiz_var.get() > 0:
+            cv2.imwrite(os.path.join(ciktilar_klasoru, "03_Gurultu_Silinmis_Maske(Open).png"), self.mask_open)
+            cv2.imwrite(os.path.join(ciktilar_klasoru, "04_Bosluklar_Kapatilmis_Maske(Close).png"), self.mask_close)
+
+        # 5. Aşama: Nihai Binary Maske
+        cv2.imwrite(os.path.join(ciktilar_klasoru, "05_Nihai_Faz_Maskesi.png"), self.son_mask)
+
+        # 6. Aşama: Orijinal Görüntü Üzerine Kırmızı Vurgu
         overlay = self.image.copy()
         mask_bolgesi = (self.son_mask == 255)
         if np.any(mask_bolgesi):
             overlay[mask_bolgesi, 0] = (overlay[mask_bolgesi, 0] * 0.4).astype(np.uint8)
             overlay[mask_bolgesi, 1] = (overlay[mask_bolgesi, 1] * 0.4).astype(np.uint8)
             overlay[mask_bolgesi, 2] = np.clip(overlay[mask_bolgesi, 2] * 0.6 + 150, 0, 255).astype(np.uint8)
-        cv2.imwrite("sonuc_maske.png", self.son_mask)
-        cv2.imwrite("sonuc_overlay.png", overlay)
-        print("Kaydedildi: sonuc_maske.png, sonuc_overlay.png")
+
+        cv2.imwrite(os.path.join(ciktilar_klasoru, "06_Renklendirilmis_Overlay.png"), overlay)
+
+        # Kullanıcıya görsel onay ver
+        messagebox.showinfo(
+            "Rapor Hazır",
+            f"Görüntü işleme adımlarının tamamı '{ciktilar_klasoru}' klasörüne numaralandırılarak kaydedildi.\n\nSunumunuzda bu fotoğrafları doğrudan kullanabilirsiniz."
+        )
 
     # ==========================================
     # RENK SEÇME (EYEDROPPER)
@@ -120,7 +175,7 @@ class RenkAyristiriciApp:
             self.guncelle()
 
     # ==========================================
-    # ANA HESAPLAMA (her kaydırıcı hareketinde çalışır)
+    # ANA HESAPLAMA & ARA KATMAN KAYITLARI
     # ==========================================
     def guncelle(self):
         if self.image is None:
@@ -135,24 +190,31 @@ class RenkAyristiriciApp:
         lower = np.array([max(0, h_merkez - tol), s_min, v_min])
         upper = np.array([min(179, h_merkez + tol), 255, 255])
 
+        # AŞAMA 1: Ham Maske
         mask = cv2.inRange(self.hsv, lower, upper)
+        self.mask_ham = mask.copy()
 
+        # AŞAMA 2 & 3: Morfolojik İşlemler
         if temizlik > 0:
             kernel = np.ones((temizlik, temizlik), np.uint8)
             mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel)
+            self.mask_open = mask.copy()  # Opening sonucu (gürültü silme)
+
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
+            self.mask_close = mask.copy()  # Closing sonucu (boşluk doldurma)
+        else:
+            self.mask_open = None
+            self.mask_close = None
 
         self.son_mask = mask
 
-        # Orijinal fotoğrafın tam kopyasıyla başla (arka plan siyah olmasın)
         sonuc = self.image.copy()
         mask_bolgesi = (mask == 255)
 
-        # Sadece seçilen pikselleri kırmızıyla vurgula, geri kalan yerlere DOKUNMA
         if np.any(mask_bolgesi):
-            sonuc[mask_bolgesi, 0] = (sonuc[mask_bolgesi, 0] * 0.4).astype(np.uint8)  # Mavi azalt
-            sonuc[mask_bolgesi, 1] = (sonuc[mask_bolgesi, 1] * 0.4).astype(np.uint8)  # Yeşil azalt
-            sonuc[mask_bolgesi, 2] = np.clip(sonuc[mask_bolgesi, 2] * 0.6 + 150, 0, 255).astype(np.uint8)  # Kırmızı öne çıkar
+            sonuc[mask_bolgesi, 0] = (sonuc[mask_bolgesi, 0] * 0.4).astype(np.uint8)
+            sonuc[mask_bolgesi, 1] = (sonuc[mask_bolgesi, 1] * 0.4).astype(np.uint8)
+            sonuc[mask_bolgesi, 2] = np.clip(sonuc[mask_bolgesi, 2] * 0.6 + 150, 0, 255).astype(np.uint8)
 
         oran = (cv2.countNonZero(mask) / mask.size) * 100
         self.oran_label.config(text=f"Oran: %{oran:.2f}")
@@ -165,7 +227,7 @@ class RenkAyristiriciApp:
         im = Image.fromarray(img_rgb)
         tk_im = ImageTk.PhotoImage(im)
         widget.configure(image=tk_im)
-        widget.image = tk_im  # referansı tut, garbage collector silmesin
+        widget.image = tk_im
 
 
 if __name__ == "__main__":

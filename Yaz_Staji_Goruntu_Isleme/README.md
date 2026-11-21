@@ -42,8 +42,7 @@ Bir üretim hattında kalite kontrolü desteklemek için OpenCV tabanlı iki gö
 
 | Dosya | Açıklama |
 |---|---|
-| `faz_ayristirma_arayuz.py` | Tkinter arayüzü: fotoğraf aç, kaydırıcılarla eşikleri ayarla, oranı anlık gör |
-| `faz_ayristirma_toplu.py` | Klasördeki görüntülerden rastgele seçip analiz eden ve tüm ara aşamaları kaydeden sürüm |
+| `faz_ayristirma_arayuz.py` | **Son sürüm arayüz (Tkinter):** `goruntuler/` klasöründen rastgele fotoğraf getirir, kaydırıcılarla H / tolerans / S-V eşiklerini ve gürültü temizliğini ayarlar, faz oranını anlık gösterir ve tüm ara aşamaları (ham maske, açma, kapama, nihai maske, renkli bindirme) ayrı görseller olarak kaydeder |
 | `otsu_esikleme.py` | Otsu eşiğini referans alıp ayarlanabilir hassasiyetle tane sınırlarını ayıran deneme |
 | `hsv_oranlama.py` | HSV kaydırıcılarıyla maske çıkarıp alan oranı hesaplayan ilk sürüm |
 
@@ -53,6 +52,8 @@ Bir üretim hattında kalite kontrolü desteklemek için OpenCV tabanlı iki gö
 pip install -r requirements.txt
 python 02_Mikroyapi_Faz_Analizi/faz_ayristirma_arayuz.py
 ```
+
+Faz analizi arayüzü, çalıştığı klasördeki `goruntuler/` klasörünü okur. Kendi mikroyapı görüntülerinizi oraya koyun.
 
 Slab betiklerinde `IMAGE_PATH` değişkenini kendi görüntünüzün yoluyla değiştirin.
 
