@@ -2,9 +2,9 @@
 
 <h1>🎓 Staj Çalışmaları</h1>
 
-<p><b>Elektronik temellerinden STM32 ile haberleşmeye ve kavramsal tasarıma, hafta hafta staj sürecim</b></p>
+<p><b>Elektronik temellerinden STM32 ile haberleşmeye, hafta hafta staj sürecim ve staj projelerim</b></p>
 
-<img alt="Süreç" src="https://img.shields.io/badge/S%C3%BCre%C3%A7-Haz%C4%B1rl%C4%B1k%20%2B%204%20hafta-6f42c1?style=for-the-badge"> <img alt="Platform" src="https://img.shields.io/badge/Platform-STM32-0969da?style=for-the-badge"> <img alt="Anahtar Kelime" src="https://img.shields.io/badge/Anahtar%20Kelime-138-1a7f37?style=for-the-badge">
+<img alt="Süreç" src="https://img.shields.io/badge/S%C3%BCre%C3%A7-Haz%C4%B1rl%C4%B1k%20%2B%204%20hafta-6f42c1?style=for-the-badge"> <img alt="Platform" src="https://img.shields.io/badge/Platform-STM32-0969da?style=for-the-badge">
 
 </div>
 
@@ -40,14 +40,14 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 
 ---
 
-## 🔑 Anahtar Kelimeler
+## 🛠️ Staj Projeleri
 
-<table>
-<tr>
-<td align="center" width="22%"><a href="Staj_haftalari/Anahtar_Kelimeler/README.md"><h1>🔑</h1></a></td>
-<td width="78%"><a href="Staj_haftalari/Anahtar_Kelimeler/README.md"><b>Anahtar Kelimeler</b></a><br>Staj sürecinde karşılaştığım teknik terimler; basınç ölçümünden haberleşmeye, MCU mimarisinden C programlamaya kadar konu gruplarına ayrılmış hâlde.<br><br><sub>11 grup · 138 kelime</sub></td>
-</tr>
-</table>
+| Proje | Açıklama | Durum |
+|---|---|---|
+| [Yaz Stajı · Görüntü İşleme](Yaz_Staji_Goruntu_Isleme/) | Slab kenar eğriliği tespiti ve mikroyapı faz analizi (OpenCV) | Tamamlandı |
+| [Basınç Test Düzeneği](Basinc_Test_Duzenegi/) | Basınç üretip referans sensörle ölçen test düzeneğinin ilk prototipi: sensör entegrasyonu (RS485 / Modbus RTU), PWM pompa kontrolü, otomatik test ve sonuç analizi | Devam ediyor |
+
+Staj sürecinde karşılaştığım teknik terimler ayrı bir repoda: 🔑 [Keywords](https://github.com/berilmrc/Keywords)
 
 ---
 
@@ -62,6 +62,7 @@ Her haftanın kendi alt klasörü içerisinde, o döneme ait kaynak kodlar, proj
  └── 02_Hafta_2               2. hafta + Wokwi simülasyonları
 📁 Staj_haftalari
  ├── 03_Hafta_3               3. hafta + Wokwi simülasyonları
- ├── 04_Hafta_4               4. hafta
- └── Anahtar_Kelimeler        Konu gruplarına ayrılmış terimler
+ └── 04_Hafta_4               4. hafta
+📁 Basinc_Test_Duzenegi       Staj projesi: basınç test düzeneği
+📁 Yaz_Staji_Goruntu_Isleme   Yaz stajı: görüntü işleme projeleri
 ```
