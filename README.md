@@ -10,6 +10,15 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 * **2. Hafta:** [C derinleşme + Mikrodenetleyici kavramı + Wokwi]
 * **Staj Haftaları** 
 
+## Staj Projeleri
+
+| Proje | Açıklama | Durum |
+|---|---|---|
+| [Yaz Stajı · Görüntü İşleme](Yaz_Staji_Goruntu_Isleme/) | Slab kenar eğriliği tespiti ve mikroyapı faz analizi (OpenCV) | Tamamlandı |
+| [Basınç Test Düzeneği](Basinc_Test_Duzenegi/) | Basınç üretip referans sensörle ölçen test düzeneğinin ilk prototipi: sensör entegrasyonu (RS485 / Modbus RTU), PWM pompa kontrolü, otomatik test ve sonuç analizi | Devam ediyor |
+
 ## Klasör Yapısı
 
 Her haftanın kendi alt klasörü içerisinde, o döneme ait kaynak kodlar, projeler ve oluşturulan raporlar yer almaktadır. İlgili haftanın detaylarını incelemek için dizinlere göz atabilirsiniz.
+
+`Basinc_Test_Duzenegi` klasörü ise staj süresince yürüttüğüm projeyi; gereksinimlerden sonuçlara kadar bir sistem dokümanı düzeninde içerir.
