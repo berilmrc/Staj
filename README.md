@@ -10,10 +10,11 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 * **2. Hafta:** [C derinleşme + Mikrodenetleyici kavramı + Wokwi]
 * **Staj Haftaları** 
 
-## Staj Projesi
+## Staj Projeleri
 
 | Proje | Açıklama | Durum |
 |---|---|---|
+| [Yaz Stajı · Görüntü İşleme](Yaz_Staji_Goruntu_Isleme/) | Slab kenar eğriliği tespiti ve mikroyapı faz analizi (OpenCV) | Tamamlandı |
 | [Basınç Test Düzeneği](Basinc_Test_Duzenegi/) | Basınç üretip referans sensörle ölçen test düzeneğinin ilk prototipi: sensör entegrasyonu (RS485 / Modbus RTU), PWM pompa kontrolü, otomatik test ve sonuç analizi | Devam ediyor |
 
 ## Klasör Yapısı
