@@ -46,7 +46,7 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 </tr>
 <tr>
 <td align="center" width="22%"><h1>🧲</h1><b>8. – 9. Hafta</b><br><sub>26 Ekim – 9 Kasım</sub></td>
-<td width="78%"><b>Kart test simülatörü · Kilit solenoidi · Valf entegrasyonu</b><br>Simülatörün mimarisi, solenoid yük bankı akım / güç hesabı, kablaj ve montaj dokümanları. Kilit solenoidi için optokuplörlü MOSFET sürme devresi, kablo kesiti seçimi ve Tkinter kontrol arayüzü. Basınç test düzeneğine solenoid valfin eklenmesi ve hedef basınçta tutma denemeleri.<br><br>📄 <a href="Staj_haftalari/08_Hafta_8_9/Ara_Rapor_3.pdf">Ara Rapor 3</a> &nbsp;·&nbsp; 📁 <a href="Staj_haftalari/08_Hafta_8_9">Klasör</a></td>
+<td width="78%"><b>Kart test simülatörü · Kilit solenoidi · Valf entegrasyonu</b><br>Simülatörün mimarisi, solenoid yük bankı akım / güç hesabı, kablaj ve montaj dokümanları. Kilit solenoidi için optokuplörlü MOSFET sürme devresi, kablo kesiti seçimi ve Tkinter kontrol arayüzü. Basınç test düzeneğine solenoid valfin eklenmesi ve hedef basınçta tutma denemeleri.<br><br>📄 <a href="Staj_haftalari/08_Hafta_8_9/Ara_Rapor_3.pdf">Ara Rapor 3</a> &nbsp;·&nbsp; 🔒 <a href="Kilit_Solenoid_Surucu">Kilit solenoidi</a> &nbsp;·&nbsp; 📁 <a href="Staj_haftalari/08_Hafta_8_9">Klasör</a></td>
 </tr>
 </table>
 
@@ -58,6 +58,7 @@ Toplam süreç; çalışma ortamına ve kullanılacak teknolojilere aşinalık k
 |---|---|---|
 | [Yaz Stajı · Görüntü İşleme](Yaz_Staji_Goruntu_Isleme/) | Slab kenar eğriliği tespiti ve mikroyapı faz analizi (OpenCV) | Tamamlandı |
 | [Basınç Test Düzeneği](Basinc_Test_Duzenegi/) | Basınç üretip referans sensörle ölçen test düzeneğinin ilk prototipi: sensör entegrasyonu (RS485 / Modbus RTU), PWM pompa kontrolü, otomatik test ve sonuç analizi | Devam ediyor |
+| [Kilit Solenoidi Sürücüsü](Kilit_Solenoid_Surucu/) | 28 V kilit solenoidini Arduino Nano ve MOSFET ile kısa darbelerle süren devre: devre şeması, montaj planı, EEPROM'a kayıtlı buton / arayüz süreleri, seri komutlar ve web arayüzü | Tamamlandı |
 | [Kart Test Simülatörü](Staj_haftalari/08_Hafta_8_9/) | Bir kontrol kartını bağlı olduğu dış sistemler olmadan masa üstünde test edebilmek için kartın dış arayüzlerini taklit eden simülatör: mimari, solenoid yük bankı, kablaj ve montaj dokümanları, simülatör yazılımı | Devam ediyor |
 
 İlgili repolar: 🔑 [Keywords](https://github.com/berilmrc/Keywords) (staj sürecinde karşılaştığım teknik terimler) · 🗂️ [Projeler](https://github.com/berilmrc/Projeler) (tüm projelerim)
@@ -80,6 +81,7 @@ Her haftanın kendi alt klasörü içerisinde, o döneme ait kaynak kodlar, proj
  ├── 06_Hafta_6_7             6.–7. haftalar + Ara Rapor 2
  └── 08_Hafta_8_9             8.–9. haftalar + Ara Rapor 3
 📁 Basinc_Test_Duzenegi       Staj projesi: basınç test düzeneği
+📁 Kilit_Solenoid_Surucu      Staj projesi: kilit solenoidi sürücü devresi
 📁 Yaz_Staji_Goruntu_Isleme   Yaz stajı: görüntü işleme projeleri
 ```
 
