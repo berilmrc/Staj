@@ -6,6 +6,9 @@ import os
 import random
 import tkinter.messagebox as messagebox
 
+# Betik hangi klasörden çalıştırılırsa çalıştırılsın yollar bu dosyanın klasörüne göre çözülür
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 
 class RenkAyristiriciApp:
     def __init__(self, root):
@@ -23,7 +26,7 @@ class RenkAyristiriciApp:
         self.mask_close = None
 
         # Sabit klasör yolunu tanımlıyoruz
-        self.klasor_yolu = "goruntuler"
+        self.klasor_yolu = os.path.join(BASE_DIR, "goruntuler")
         self.resim_listesi = []
 
         self.build_ui()
@@ -91,7 +94,7 @@ class RenkAyristiriciApp:
 
         gecerli_uzantilar = ('.jpg', '.jpeg', '.png', '.bmp', '.tif')
         self.resim_listesi = [
-            os.path.join(self.klasor_yolu, f) for f in os.listdir(self.klasor_yolu)
+            os.path.join(self.klasor_yolu, f) for f in sorted(os.listdir(self.klasor_yolu))
             if f.lower().endswith(gecerli_uzantilar)
         ]
 
@@ -127,7 +130,7 @@ class RenkAyristiriciApp:
             return
 
         # Sunum ve kontrol için özel çıktı klasörü oluşturuluyor
-        ciktilar_klasoru = "Asama_Ciktilari"
+        ciktilar_klasoru = os.path.join(BASE_DIR, "Asama_Ciktilari")
         if not os.path.exists(ciktilar_klasoru):
             os.makedirs(ciktilar_klasoru)
 

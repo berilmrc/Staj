@@ -61,6 +61,16 @@ Excel kaydı ◄── sonuç kodu (düz / iç bükey / dış bükey) ──► 
 | `faz_ayristirma_arayuz.py` | **Son sürüm arayüz (Tkinter):** `goruntuler/` klasöründen rastgele fotoğraf getirir, kaydırıcılarla H / tolerans / S-V eşiklerini ve gürültü temizliğini ayarlar, faz oranını anlık gösterir ve tüm ara aşamaları (ham maske, açma, kapama, nihai maske, renkli bindirme) ayrı görseller olarak kaydeder |
 | `otsu_esikleme.py` | Otsu eşiğini referans alıp ayarlanabilir hassasiyetle tane sınırlarını ayıran deneme |
 | `hsv_oranlama.py` | HSV kaydırıcılarıyla maske çıkarıp alan oranı hesaplayan ilk sürüm |
+| `goruntuler/` | Arayüzün açılışta okuduğu 7 örnek mikroyapı görüntüsü |
+| `ornek_ciktilar/` | Arayüzün gerçek bir çalıştırmada kaydettiği aşama çıktıları |
+
+**Örnek çıktılar** (arayüzün kaydettiği gerçek aşamalar)
+
+| Orijinal | Ham renk maskesi | Gürültü silinmiş (açma) |
+|---|---|---|
+| ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/01_Orijinal_Mikroyapi.png) | ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/02_Ham_Renk_Maskesi.png) | ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/03_Gurultu_Silinmis_Maske_Open.png) |
+| **Boşluklar kapatılmış (kapama)** | **Nihai faz maskesi** | **Renkli bindirme** |
+| ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/04_Bosluklar_Kapatilmis_Maske_Close.png) | ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/05_Nihai_Faz_Maskesi.png) | ![](02_Mikroyapi_Faz_Analizi/ornek_ciktilar/06_Renklendirilmis_Overlay.png) |
 
 ## Çalıştırma
 
@@ -69,7 +79,7 @@ pip install -r requirements.txt
 python 02_Mikroyapi_Faz_Analizi/faz_ayristirma_arayuz.py
 ```
 
-Faz analizi arayüzü, çalıştığı klasördeki `goruntuler/` klasörünü okur. Kendi mikroyapı görüntülerinizi oraya koyun.
+Faz analizi arayüzü hangi klasörden çalıştırılırsa çalıştırılsın kendi klasöründeki `goruntuler/` klasörünü okur ve örnek görüntülerden birini açılışta gösterir. "Aşamaları Kaydet" düğmesi çıktıları yine kendi klasöründeki `Asama_Ciktilari/` klasörüne yazar. Kendi mikroyapı görüntülerinizi `goruntuler/` klasörüne ekleyebilirsiniz.
 
 Slab analizini tek bir fotoğrafla denemek için `python 01_Slab_Kenar_Egriligi/gorsel_test_arayuzu.py` çalıştırın. Otomasyon entegrasyonu çalışan bir OPC UA sunucusu (ör. Kepware simülasyon cihazı) gerektirir.
 

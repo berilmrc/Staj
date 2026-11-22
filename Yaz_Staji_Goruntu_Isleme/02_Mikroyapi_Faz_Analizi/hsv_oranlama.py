@@ -1,4 +1,5 @@
 import cv2
+import os
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog
@@ -7,7 +8,8 @@ root.withdraw()
 while True:
     print("Lütfen açılan pencereden bir fotoğraf seçin...")
     image_file = filedialog.askopenfilename(
-        title="İşlem Yapılacak Fotoğrafı Seç")
+        title="İşlem Yapılacak Fotoğrafı Seç",
+        initialdir=os.path.join(os.path.dirname(os.path.abspath(__file__)), "goruntuler"))
     if not image_file:
         print("İptal edildi. Program tamamen sonlandırılıyor.")
         break

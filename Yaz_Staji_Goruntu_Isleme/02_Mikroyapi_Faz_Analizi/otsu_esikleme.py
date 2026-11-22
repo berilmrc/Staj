@@ -1,10 +1,12 @@
 import cv2
 import numpy as np
+import os
 
 def nothing(x):
     pass
 
-dosya_adi = "ornek.jpg"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+dosya_adi = os.path.join(BASE_DIR, "goruntuler", "ornek_01.jpg")
 image = cv2.imread(dosya_adi)
 if image is None:
     print(f"HATA: '{dosya_adi}' dosyası bulunamadı!")
