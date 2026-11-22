@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solenoid Kontrol</title>
+<style>
+:root {
+  --bg: #f4f6f8; --card: #ffffff; --text: #1f2a36; --muted: #5f6b78; --line: #dde3e9;
+  --accent: #2463c9; --accent-soft: #e6eefb;
+  --go: #1f9d55; --go-dark: #177a42; --stop: #d03b30; --stop-dark: #a92d24;
+  --warn-bg: #fff4e0; --warn: #8a5a00; --lamp-off: #c9d0d7; --lamp-on: #f2a31b;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161b; --card: #1b2128; --text: #e7ecf1; --muted: #9aa6b2; --line: #2c343d;
+    --accent: #6b9cf0; --accent-soft: #1d2a3d; --warn-bg: #3a2c12; --warn: #f3c46b; --lamp-off: #3a434d;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 14px 16px 20px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+h1 { font-size: 22px; margin: 0; }
+h1 small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); }
+.conn { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); font-size: 14px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--lamp-off); }
+.pill.ok .dot { background: var(--go); }
+.pill.demo .dot { background: var(--lamp-on); }
+button { font: inherit; cursor: pointer; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); padding: 9px 14px; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.banner { background: var(--warn-bg); color: var(--warn); border-radius: 10px; padding: 10px 14px; margin-bottom: 14px; font-size: 14px; display: none; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; margin-bottom: 12px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 16px; align-items: start; }
+.right { position: sticky; top: 12px; }
+@media (max-width: 900px) { .layout { grid-template-columns: 1fr; } .right { display: contents; } .hero { order: -1; position: sticky; top: 0; z-index: 5; margin-bottom: 0; } .right > .card { order: 1; margin-bottom: 0; } }
+.card h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+.big { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.big input { font-size: 40px; font-weight: 700; width: 190px; padding: 2px 10px; border: 2px solid var(--line); border-radius: 12px; background: transparent; color: var(--text); }
+.big input:focus { outline: none; border-color: var(--accent); }
+.big .unit { font-size: 22px; color: var(--muted); }
+.big .sec { font-size: 15px; color: var(--muted); }
+input[type=range] { width: 100%; margin: 12px 0 4px; accent-color: var(--accent); }
+.scale { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chips button { padding: 6px 12px; border-radius: 999px; font-size: 14px; }
+.chips button.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 600px) { .row { grid-template-columns: 1fr; } .big input { font-size: 36px; width: 150px; } .hero { min-height: 0; padding: 14px; grid-template-columns: auto 1fr auto; text-align: left; justify-items: start; } .hero .lamp { width: 56px; height: 56px; } .hero .bar, .hero .last, .hero .stats { grid-column: 1 / -1; } .hero .st-text b { font-size: 24px; } }
+label.f { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper input, .num { font-size: 20px; font-weight: 600; width: 120px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--text); text-align: center; }
+.stepper button { width: 42px; height: 42px; padding: 0; font-size: 20px; }
+.hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.actions { display: grid; grid-template-columns: 2fr 1fr; gap: 12px; }
+.fire { font-size: 24px; font-weight: 700; padding: 18px; border: none; color: #fff; background: var(--go); border-radius: 14px; }
+.fire:hover:not(:disabled) { background: var(--go-dark); }
+.stopb { font-size: 20px; font-weight: 700; padding: 18px; border: none; color: #fff; background: var(--stop); border-radius: 14px; }
+.stopb:hover:not(:disabled) { background: var(--stop-dark); }
+.keys { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
+.status-unused { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.hero { display: grid; grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 10px; background: var(--card); border: 2px solid var(--line); border-radius: 16px; padding: 18px 18px 14px; margin-bottom: 12px; min-height: 340px; align-content: center; gap: 8px; transition: background .08s, border-color .08s, color .08s; }
+.hero .bar { width: 100%; margin-top: 6px; }
+.hero .stats { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; width: 100%; }
+.hero .stats .counter { background: rgba(127,127,127,.10); border-radius: 12px; padding: 8px 6px; }
+.hero .timer b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hero .stats .counter b { font-size: 28px; line-height: 1.15; }
+.hero .stats .counter > span { font-size: 12px; }
+.hero .timer small { font-size: 16px; font-weight: 600; opacity: .75; }
+.hero .last { font-size: 13px; color: var(--muted); }
+.hero .st-text b { font-size: 34px; letter-spacing: .02em; }
+.hero .counter { margin: 0; text-align: center; }
+.hero.ready { border-color: var(--go); }
+.hero.firing { background: var(--lamp-on); border-color: var(--lamp-on); color: #1b1300; }
+.hero.firing .st-text span, .hero.firing .counter span, .hero.firing .last { color: #3d2a00; }
+.hero.firing .bar { background: rgba(0,0,0,.18); }
+.hero.firing .bar i { background: #1b1300; }
+.hero.waiting { border-color: var(--lamp-on); }
+.hero.done { background: var(--go); border-color: var(--go); color: #fff; }
+.hero.done .bar, .hero.stopped .bar { background: rgba(255,255,255,.3); }
+.hero.done .bar i, .hero.stopped .bar i { background: #fff; }
+.hero.done .st-text span, .hero.done .counter span, .hero.done .last { color: #e5fff0; }
+.hero.stopped { background: var(--stop); border-color: var(--stop); color: #fff; }
+.hero.stopped .st-text span, .hero.stopped .counter span, .hero.stopped .last { color: #ffe9e7; }
+.lamp { width: 90px; height: 90px; border-radius: 50%; background: var(--lamp-off); border: 4px solid rgba(0,0,0,.08); flex: none; }
+.hero.firing .lamp { background: #fff7d6; box-shadow: 0 0 0 6px rgba(255,255,255,.45), 0 0 34px #fff3b0; }
+.hero.done .lamp { background: #c9f5da; }
+.hero.ready .lamp { background: var(--go); opacity: .35; }
+.hero.stopped .lamp { background: #ffd2cd; }
+.st-text b { font-size: 20px; display: block; }
+.st-text span { color: var(--muted); font-size: 14px; }
+.bar { height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; margin-top: 14px; }
+.bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.counter { margin-left: auto; text-align: right; }
+.counter b { font-size: 34px; display: block; }
+.counter > span { color: var(--muted); font-size: 13px; }
+details { margin-top: 4px; }
+summary { cursor: pointer; color: var(--muted); font-size: 14px; }
+pre { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; height: 140px; overflow: auto; font: 13px/1.4 Consolas, monospace; margin: 10px 0 0; white-space: pre-wrap; }
+.foot { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.msg { font-size: 14px; min-height: 20px; }
+.msg.err { color: var(--stop); }
+.msg.ok { color: var(--go); }
+.help { font-size: 14px; color: var(--muted); }
+.help ol { padding-left: 20px; margin: 6px 0; }
+@media (max-width: 600px) { .hero { min-height: 0; padding: 12px; gap: 6px; grid-template-columns: 1fr; justify-items: center; text-align: center; } .hero .lamp { display: none; } .hero .st-text b { font-size: 26px; } .hero .stats .counter b { font-size: 24px; } }
+dialog.code { width: min(900px, calc(100vw - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--text); }
+dialog.code::backdrop { background: rgba(0,0,0,.45); }
+dialog.code .dh { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+dialog.code .dh b { margin-right: auto; font-size: 15px; }
+dialog.code pre { margin: 0; height: auto; max-height: calc(100vh - 130px); overflow: auto; padding: 14px 16px; font-size: 12.5px; line-height: 1.45; border: 0; border-radius: 0; }
+.codebtn { font-size: 13px; padding: 6px 10px; }
+
+.grp { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin: 0 2px 8px; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .03em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; }
+.grp-ui .tag { background: var(--accent-soft); color: var(--accent); }
+.gnote { font-size: 12.5px; color: var(--muted); }
+.left > .card { border-left: 4px solid var(--accent); }
+.bcard { border-left: 4px solid #7c3aed; }
+.bcard h2 { display: flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 14px; color: var(--text); }
+.bcard .tag { background: #ede4ff; color: #6d28d9; }
+.brow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.brow input { width: 96px; font-size: 26px; font-weight: 700; padding: 4px 8px; border-radius: 10px; text-align: center; }
+.brow .chips { margin-top: 0; gap: 6px; }
+.brow .chips button { padding: 4px 9px; font-size: 13px; }
+.bcard .chips button.on { background: #ede4ff; border-color: #7c3aed; color: #6d28d9; }
+.bcard .hint.ok { color: var(--go); font-weight: 600; }
+.bcard .hint.err { color: var(--stop, #c0392b); }
+.hero { min-height: 270px !important; padding: 14px 16px 12px !important; }
+.lamp { width: 64px !important; height: 64px !important; }
+.hero .st-text b { font-size: 30px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .bcard .tag, :root:not([data-theme="light"]) .bcard .chips button.on { background: #2e1f52; color: #c4b0ff; } }
+
+/* tek ekrana sığdırma */
+.card { padding: 11px 16px; margin-bottom: 10px; }
+.card h2 { margin-bottom: 6px; }
+.big input { font-size: 32px; padding: 4px 10px; }
+input[type=range] { margin: 8px 0 2px; }
+.scale { font-size: 11px; }
+.chips { margin-top: 6px; }
+.chips button { padding: 4px 11px; font-size: 13px; }
+.left .hint { margin-top: 2px; font-size: 12px; }
+.left label.f { margin-bottom: 4px; }
+.fire, .stopb { padding: 12px !important; }
+.keys { margin-top: 6px; }
+.hero { min-height: 250px !important; gap: 6px !important; }
+.bcard h2 { margin-bottom: 8px; }
+.bcard .hint { margin-top: 6px; font-size: 12.5px; }
+.grp { margin-bottom: 6px; }
+.bhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.bhead h2 { margin: 0 !important; }
+.bin { display: flex; align-items: center; gap: 6px; }
+.bin input { width: 92px; font-size: 24px; font-weight: 700; padding: 2px 8px; border-radius: 10px; text-align: center; }
+.bcard .chips { margin-top: 8px; gap: 6px; }
+.bcard .chips button { padding: 3px 10px; font-size: 13px; }
+.lamp { width: 48px !important; height: 48px !important; }
+.hero .stats .counter { padding: 5px 6px; }
+.hero .stats .counter b { font-size: 24px; }
+.hero .st-text b { font-size: 28px; }
+.hero { min-height: 0 !important; }
+.wrap { padding-bottom: 6px !important; }
+.right > .card:last-child, .left > .card:last-child { margin-bottom: 0; }
+.msg:empty { display: none; }
+@media (max-width: 900px) { .right > .bcard { order: -1; } }
+
+/* v7: buton kartı solda, tekrar tek satır */
+.hero { min-height: 380px !important; gap: 10px !important; }
+.lamp { width: 84px !important; height: 84px !important; }
+.hero .st-text b { font-size: 32px; }
+.hero .stats .counter b { font-size: 28px; }
+.card h2 { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.card h2 .gnote { text-transform: none; letter-spacing: 0; font-weight: 400; }
+.tag-ui { background: var(--accent-soft); color: var(--accent); }
+.bcard h2 { text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-size: 14px; }
+.big .hint { margin-left: auto; font-size: 12.5px; }
+.bcard input[type=range] { accent-color: #7c3aed; }
+.bcard .big input { border-color: #c9b5f5; }
+.trow { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tl { font-size: 14px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.trow .stepper input { width: 70px; }
+.trow .stepper button { width: 36px; height: 36px; }
+.trow .num { width: 90px; }
+.trow .unit.sm { font-size: 14px; margin-left: -4px; }
+.trow .hint { margin: 0 0 0 auto; }
+.tcard { padding-top: 9px; padding-bottom: 9px; }
+.scale[hidden] { display: none; }
+@media (max-width: 900px) { .hero { min-height: 0 !important; } }
+@media (max-width: 600px) { .lamp { display: none !important; } .hero { gap: 6px !important; } }
+.bigval { display: none; font-size: 64px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigval small { font-size: 28px; font-weight: 700; opacity: .85; }
+.hero.saved { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+.hero.saved .st-text span, .hero.saved .last { color: #ede4ff; }
+.hero.saved .lamp { background: #e4d6ff; box-shadow: 0 0 0 6px rgba(255,255,255,.3); }
+.hero.saved .bigval { display: block; }
+.hero.saved .stats, .hero.saved .bar { display: none; }
+.hero.saving .bigval { display: block; opacity: .6; }
+.hero.saving .stats, .hero.saving .bar { display: none; }
+.hero.saving { border-color: #7c3aed; }
+
+/* renkli bölüm kutuları */
+.box { border: 2px solid; border-radius: 16px; padding: 6px 8px 8px; margin-bottom: 10px; }
+.box .card { margin-bottom: 6px; border-left: 1px solid var(--line) !important; }
+.box .card:last-child { margin-bottom: 0; }
+.boxhead { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 0 6px 5px; }
+.boxhead .bt { font-size: 13px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
+.boxhead .bs { font-size: 12.5px; }
+.box-btn { border-color: #7c3aed; background: #f3edff; }
+.box-btn .bt { color: #6d28d9; } .box-btn .bs { color: #6b5a8e; }
+.box-ui { border-color: var(--accent); background: #eaf2ff; }
+.box-ui .bt { color: var(--accent); } .box-ui .bs { color: #4d6487; }
+.left > .box:last-child { margin-bottom: 0; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .box-btn { background: #221a35; } :root:not([data-theme="light"]) .box-btn .bt { color: #c4b0ff; } :root:not([data-theme="light"]) .box-btn .bs { color: #a99cc7; }
+  :root:not([data-theme="light"]) .box-ui { background: #16233a; } :root:not([data-theme="light"]) .box-ui .bt { color: #8db8ff; } :root:not([data-theme="light"]) .box-ui .bs { color: #9fb2cf; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Solenoid Kontrol<small>Kilit solenoid sürücüsü · D9</small></h1>
+    <div class="conn">
+      <span class="pill" id="pill"><span class="dot"></span><span id="pillText">Bağlı değil</span></span>
+      <button class="primary" id="btnConnect">Arduino'ya bağlan</button>
+      <button id="btnDemo" title="Arduino olmadan arayüzü denemek için">Demo</button>
+      <button id="btnCode" class="codebtn" title="Arduino kodunu göster">&lt;/&gt; Kod</button>
+    </div>
+  </header>
+
+  <div class="banner" id="banner">Bu tarayıcı USB seri bağlantıyı desteklemiyor. Lütfen <b>Google Chrome</b> veya <b>Microsoft Edge</b> ile açın. Arduino olmadan denemek için "Demo" düğmesini kullanabilirsiniz.</div>
+
+  <div class="layout">
+  <div class="left">
+  <div class="box box-btn">
+  <div class="boxhead"><span class="bt">🔘 Fiziksel buton</span><span class="bs">Tetikleme süresi · her basış tek darbe · Arduino'ya kaydedilir</span></div>
+  <section class="card bcard">
+    <div class="big">
+      <input id="bsure" type="number" inputmode="numeric" min="10" max="5000" step="10" value="50" aria-label="Buton tetikleme süresi (ms)" disabled>
+      <span class="unit">ms</span>
+      <span class="sec" id="bsureSec">= 0,05 saniye</span>
+      <span class="hint" id="bMsg">Değiştirmek için bağlanın.</span>
+    </div>
+    <input id="bsureRange" type="range" min="10" max="5000" step="10" value="50" aria-label="Buton süresi kaydırıcı" disabled>
+    <div class="chips" id="bchips"></div>
+  </section>
+
+  </div>
+  <div class="box box-ui">
+  <div class="boxhead"><span class="bt">🖥 Arayüzden tetikleme</span><span class="bs">Sadece bu sayfadaki TETİKLE kullanır · Kısayol: <b>Boşluk</b> tetikle, <b>Esc</b> durdur</span></div>
+  <section class="card">
+    <div class="big">
+      <input id="sure" type="number" inputmode="numeric" min="10" max="5000" step="10" value="50" aria-label="Tetikleme süresi (ms)">
+      <span class="unit">ms</span>
+      <span class="sec" id="sureSec">= 0,10 saniye</span>
+    </div>
+    <input id="sureRange" type="range" min="10" max="5000" step="10" value="50" aria-label="Tetikleme süresi kaydırıcı">
+    <div class="scale" hidden><span id="minLbl">10 ms</span><span id="maxLbl">5000 ms</span></div>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="card tcard">
+    <div class="trow">
+      <label class="tl" for="tekrar">Tekrar</label>
+      <div class="stepper">
+        <button id="tMinus" aria-label="Azalt">−</button>
+        <input id="tekrar" type="number" min="1" max="1000" value="1">
+        <button id="tPlus" aria-label="Artır">+</button>
+      </div>
+      <label class="tl" for="aralik">Aralık</label>
+      <input class="num" id="aralik" type="number" min="100" max="60000" step="50" value="1000"><span class="unit sm">ms</span>
+      <span class="hint" id="aralikHint">Tek darbede kullanılmaz</span>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="actions">
+      <button class="fire" id="btnFire" disabled>TETİKLE</button>
+      <button class="stopb" id="btnStop" disabled>DURDUR</button>
+    </div>
+  </section>
+  </div>
+  </div>
+  <div class="right">
+  <section class="hero" id="hero" aria-live="polite">
+    <div class="lamp" id="lamp"></div>
+    <div class="st-text"><b id="stMain">Bağlı değil</b><span id="stSub">Önce Arduino'ya bağlanın</span></div>
+    <div class="bigval" id="bigVal"></div>
+    <div class="stats">
+      <div class="counter timer"><b><span id="tNow">0</span><small> / <span id="tSet">0</span> ms</small></b><span id="tLbl">geçen süre</span></div>
+      <div class="counter"><b id="cnt">0 / 0</b><span>darbe</span></div>
+    </div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="last" id="last">Henüz tetikleme yapılmadı</div>
+  </section>
+  <section class="card">
+    <div class="foot">
+      <span class="msg" id="msg"></span>
+    </div>
+    <details>
+      <summary>Haberleşme kaydı</summary>
+      <pre id="log"></pre>
+    </details>
+    <details>
+      <summary>Nasıl kullanılır?</summary>
+      <div class="help"><ol>
+        <li>Normal kullanımda bilgisayar gerekmez: D2–GND arasındaki <b>butona</b> basınca solenoid <b>buton süresi</b> kadar (başlangıç 50 ms) tek darbe çeker. Tetikleme sürerken tekrar basmak durdurur.</li>
+        <li><b>İki ayrı süre var:</b> mor "Fiziksel buton" kutusu sadece butonu, mavi "Arayüzden tetikleme" bölümü sadece bu sayfadaki TETİKLE düğmesini etkiler.</li>
+        <li>Arduino Mega'ya <b>solenoid_kontrol.ino</b> yazılımını yükleyin (bir kez).</li>
+        <li>Arduino IDE'nin Seri Port Ekranı açıksa kapatın.</li>
+        <li>Bu dosyayı Chrome veya Edge ile açın, "Arduino'ya bağlan"a basın ve listeden Arduino Mega'nın portunu seçin.</li>
+        <li>Süreyi kaydırıcı, kutucuk veya hazır düğmelerle ayarlayın, "TETİKLE"ye basın.</li>
+        <li>Buton süresi değiştirilince otomatik olarak Arduino'ya kaydedilir. USB'yi çıkarsanız da buton yeni süreyle çalışır.</li>
+        <li>Bağlıyken butona basılırsa arayüz bunu da gösterir.</li>
+      </ol>
+      Süre 10–5000 ms arasında olabilir. Bu sınır Arduino yazılımında da var, solenoid ve MOSFET'in ısınmasını önler.</div>
+    </details>
+  </section>
+  </div>
+  </div>
+</div>
+
+<dialog class="code" id="codeDlg">
+  <div class="dh"><b>solenoid_kontrol.ino</b><button id="codeCopy">Kopyala</button><button id="codeDl">İndir</button><button id="codeClose" aria-label="Kapat">Kapat</button></div>
+  <pre id="codeBox"></pre>
+</dialog>
+<script type="text/plain" id="inoSrc">/*
+  Kilit solenoid sürücüsü · Kontrol yazılımı (Arduino Mega 2560)
+
+  D9 HIGH  -&gt; Q1 (IRLZ44N) iletimde -&gt; solenoid çeker
+  D9 LOW   -&gt; solenoid bırakır
+
+  TETİK BUTONU (asıl kullanım):
+    Buton bir ucu D2'ye, diğer ucu GND'ye. Direnç gerekmez (dahili pull-up).
+    Butona basınca BUTON SÜRESİ kadar (başlangıç 50 ms) tek darbe atar.
+    Tetikleme sürerken tekrar basılırsa durdurur.
+    Basılı tutmak tekrar tetiklemez; her basış tek tetikleme.
+
+  İKİ AYRI SÜRE VAR:
+    Buton süresi  (BSURE)  -&gt; sadece fiziksel buton kullanır, tek darbe.
+    Arayüz süresi (SURE)   -&gt; sadece arayüzdeki TETİKLE kullanır,
+                              TEKRAR ve ARALIK ile birlikte.
+  Biri değişince diğeri etkilenmez. İkisi de kalıcı kaydedilir;
+  elektrik kesilse de buton kendi süresiyle çalışmaya devam eder.
+
+  Bilgisayar gerekmez. Buton süresini değiştirmek için USB ile bağlanıp
+  arayüzden (solenoid-arayuz.html, Chrome / Edge) yeni süre girilir.
+
+  Komutlar (her komut bir satır, sonunda Enter):
+    BSURE &lt;ms&gt;       Buton tetikleme süresi, ms (tek darbe)
+    SURE &lt;ms&gt;        Arayüzden tetikleme (açık kalma) süresi, ms
+    TEKRAR &lt;adet&gt;    Bir tetiklemede kaç darbe atılacağı (1 = tek darbe)
+    ARALIK &lt;ms&gt;      İki darbe arasındaki bekleme süresi, ms
+    TETIKLE          Arayüz süresi/tekrar/aralık ile tetikle
+    DURDUR           Solenoidi hemen bırak, devam eden tetiklemeyi iptal et
+    DURUM            Ayarları ve durumu yaz
+    KAYDET           Ayarları kalıcı belleğe yaz (ayarlar zaten otomatik kaydedilir)
+
+  Cevaplar:
+    OK ... / HATA ... / DURUM ... / ACIK &lt;n&gt; / KAPALI &lt;n&gt; / BITTI / IPTAL / HAZIR
+    BUTON  (butonla tetiklendi; ardından ACIK 1 gelir)
+*/
+
+#include &lt;EEPROM.h&gt;
+
+// ---------- Ayarlanabilir sınırlar ----------
+const uint8_t  SOLENOID_PIN   = 9;
+const uint8_t  BUTON_PIN      = 2;       // buton D2 - GND arası
+const uint16_t BUTON_SABIT_MS = 30;      // ark/titreşim süzme (debounce)
+const uint32_t SURE_MIN_MS    = 10;      // en kısa açık kalma
+const uint32_t SURE_MAX_MS    = 5000;    // en uzun açık kalma (solenoid ve Q1 ısınmasın)
+const uint32_t ARALIK_MIN_MS  = 100;     // iki darbe arası en kısa bekleme
+const uint32_t ARALIK_MAX_MS  = 60000;
+const uint16_t TEKRAR_MAX     = 1000;
+
+// ---------- Ayarlar ----------
+struct Ayarlar {
+  uint16_t imza;
+  uint32_t sureMs;
+  uint16_t tekrar;
+  uint32_t aralikMs;
+  uint32_t butonSureMs;
+};
+const uint16_t IMZA = 0x5D03;
+// başlangıç: arayüz 50 ms tek darbe, buton 50 ms
+Ayarlar ayar = { IMZA, 50, 1, 1000, 50 };
+
+// ---------- Durum ----------
+bool     calisiyor   = false;   // tetikleme dizisi devam ediyor mu
+bool     acik        = false;   // solenoid şu an çekili mi
+uint16_t darbeNo     = 0;       // kaçıncı darbe
+uint32_t sonGecis    = 0;       // son aç/kapa anı (millis)
+uint32_t aktifSure   = 50;      // çalışan dizinin darbe süresi
+uint16_t aktifTekrar = 1;       // çalışan dizinin darbe sayısı
+
+// Buton
+bool     butonOkunan   = HIGH;  // ham okuma
+bool     butonKararli  = HIGH;  // süzülmüş durum (HIGH = basılı değil)
+uint32_t butonDegisim  = 0;
+
+char     satir[48];
+uint8_t  satirUzunluk = 0;
+
+void solenoidKapat() {
+  digitalWrite(SOLENOID_PIN, LOW);
+  acik = false;
+}
+
+void solenoidAc() {
+  digitalWrite(SOLENOID_PIN, HIGH);
+  acik = true;
+}
+
+void durumYaz() {
+  Serial.print(F("DURUM sure="));   Serial.print(ayar.sureMs);
+  Serial.print(F(" tekrar="));      Serial.print(ayar.tekrar);
+  Serial.print(F(" aralik="));      Serial.print(ayar.aralikMs);
+  Serial.print(F(" bsure="));       Serial.print(ayar.butonSureMs);
+  Serial.print(F(" calisiyor="));   Serial.print(calisiyor ? 1 : 0);
+  Serial.print(F(" acik="));        Serial.print(acik ? 1 : 0);
+  Serial.print(F(" min="));         Serial.print(SURE_MIN_MS);
+  Serial.print(F(" max="));         Serial.print(SURE_MAX_MS);
+  Serial.print(F(" aralikmin="));   Serial.println(ARALIK_MIN_MS);
+}
+
+void ayarYukle() {
+  Ayarlar a;
+  EEPROM.get(0, a);
+  if (a.imza == IMZA &amp;&amp;
+      a.sureMs &gt;= SURE_MIN_MS &amp;&amp; a.sureMs &lt;= SURE_MAX_MS &amp;&amp;
+      a.tekrar &gt;= 1 &amp;&amp; a.tekrar &lt;= TEKRAR_MAX &amp;&amp;
+      a.aralikMs &gt;= ARALIK_MIN_MS &amp;&amp; a.aralikMs &lt;= ARALIK_MAX_MS &amp;&amp;
+      a.butonSureMs &gt;= SURE_MIN_MS &amp;&amp; a.butonSureMs &lt;= SURE_MAX_MS) {
+    ayar = a;
+  }
+}
+
+// EEPROM.put sadece değişen baytları yazar; aynı değer tekrar gelirse bellek yıpranmaz
+void ayarKaydet() {
+  ayar.imza = IMZA;
+  EEPROM.put(0, ayar);
+}
+
+void tetikle(uint32_t sure, uint16_t tekrar) {
+  aktifSure = sure; aktifTekrar = tekrar;
+  calisiyor = true; darbeNo = 1; sonGecis = millis();
+  solenoidAc();
+  Serial.print(F("ACIK ")); Serial.println(darbeNo);
+}
+
+void durdur() {
+  bool vardi = calisiyor || acik;
+  solenoidKapat(); calisiyor = false;
+  Serial.println(vardi ? F("IPTAL") : F("OK durdu"));
+}
+
+// Buton: basılma anında (kenar) bir kez çalışır, basılı tutmak tekrar tetiklemez
+void butonKontrol() {
+  bool okunan = digitalRead(BUTON_PIN);
+  uint32_t simdi = millis();
+  if (okunan != butonOkunan) { butonOkunan = okunan; butonDegisim = simdi; }
+  if (simdi - butonDegisim &gt;= BUTON_SABIT_MS &amp;&amp; butonKararli != butonOkunan) {
+    butonKararli = butonOkunan;
+    if (butonKararli == LOW) {            // yeni basıldı
+      if (calisiyor) { durdur(); }
+      else { Serial.println(F("BUTON")); tetikle(ayar.butonSureMs, 1); }
+    }
+  }
+}
+
+bool sayiOku(const char *s, uint32_t &amp;deger) {
+  while (*s == ' ') s++;
+  if (*s &lt; '0' || *s &gt; '9') return false;
+  uint32_t v = 0;
+  while (*s &gt;= '0' &amp;&amp; *s &lt;= '9') {
+    v = v * 10 + (*s - '0');
+    if (v &gt; 10000000UL) return false;
+    s++;
+  }
+  while (*s == ' ') s++;
+  if (*s != '\0') return false;
+  deger = v;
+  return true;
+}
+
+bool basliyorMu(const char *s, const char *onek) {
+  while (*onek) { if (*s++ != *onek++) return false; }
+  return *s == '\0' || *s == ' ';
+}
+
+void komutIsle(char *k) {
+  for (char *p = k; *p; p++) if (*p &gt;= 'a' &amp;&amp; *p &lt;= 'z') *p -= 32;   // büyük harfe çevir
+  uint32_t v;
+
+  if (basliyorMu(k, "BSURE")) {
+    if (!sayiOku(k + 5, v)) { Serial.println(F("HATA bsure sayi olmali")); return; }
+    if (v &lt; SURE_MIN_MS || v &gt; SURE_MAX_MS) {
+      Serial.print(F("HATA bsure ")); Serial.print(SURE_MIN_MS); Serial.print(F("-"));
+      Serial.print(SURE_MAX_MS); Serial.println(F(" ms arasinda olmali")); return;
+    }
+    ayar.butonSureMs = v; ayarKaydet(); Serial.print(F("OK bsure=")); Serial.println(v);
+  } else if (basliyorMu(k, "SURE")) {
+    if (!sayiOku(k + 4, v)) { Serial.println(F("HATA sure sayi olmali")); return; }
+    if (v &lt; SURE_MIN_MS || v &gt; SURE_MAX_MS) {
+      Serial.print(F("HATA sure ")); Serial.print(SURE_MIN_MS); Serial.print(F("-"));
+      Serial.print(SURE_MAX_MS); Serial.println(F(" ms arasinda olmali")); return;
+    }
+    ayar.sureMs = v; ayarKaydet(); Serial.print(F("OK sure=")); Serial.println(v);
+  } else if (basliyorMu(k, "TEKRAR")) {
+    if (!sayiOku(k + 6, v) || v &lt; 1 || v &gt; TEKRAR_MAX) {
+      Serial.print(F("HATA tekrar 1-")); Serial.print(TEKRAR_MAX); Serial.println(F(" arasinda olmali")); return;
+    }
+    ayar.tekrar = (uint16_t)v; ayarKaydet(); Serial.print(F("OK tekrar=")); Serial.println(v);
+  } else if (basliyorMu(k, "ARALIK")) {
+    if (!sayiOku(k + 6, v) || v &lt; ARALIK_MIN_MS || v &gt; ARALIK_MAX_MS) {
+      Serial.print(F("HATA aralik ")); Serial.print(ARALIK_MIN_MS); Serial.print(F("-"));
+      Serial.print(ARALIK_MAX_MS); Serial.println(F(" ms arasinda olmali")); return;
+    }
+    ayar.aralikMs = v; ayarKaydet(); Serial.print(F("OK aralik=")); Serial.println(v);
+  } else if (basliyorMu(k, "TETIKLE")) {
+    if (calisiyor) { Serial.println(F("HATA zaten calisiyor")); return; }
+    tetikle(ayar.sureMs, ayar.tekrar);
+  } else if (basliyorMu(k, "DURDUR")) {
+    durdur();
+  } else if (basliyorMu(k, "DURUM")) {
+    durumYaz();
+  } else if (basliyorMu(k, "KAYDET")) {
+    ayarKaydet(); Serial.println(F("OK kaydedildi"));
+  } else if (k[0] != '\0') {
+    Serial.println(F("HATA bilinmeyen komut"));
+  }
+}
+
+void setup() {
+  pinMode(SOLENOID_PIN, OUTPUT);
+  solenoidKapat();                 // açılışta solenoid kesinlikle kapalı
+  pinMode(BUTON_PIN, INPUT_PULLUP);
+  butonOkunan = butonKararli = digitalRead(BUTON_PIN);  // açılışta basılıysa tetikleme
+  Serial.begin(115200);
+  ayarYukle();
+  Serial.println(F("HAZIR KILIT-SOL"));
+  durumYaz();
+}
+
+void loop() {
+  // 1) Seri porttan gelen komutları oku
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\r') continue;
+    if (c == '\n') {
+      satir[satirUzunluk] = '\0';
+      komutIsle(satir);
+      satirUzunluk = 0;
+    } else if (satirUzunluk &lt; sizeof(satir) - 1) {
+      satir[satirUzunluk++] = c;
+    }
+  }
+
+  // 2) Buton
+  butonKontrol();
+
+  // 3) Zamanlama (bekletmeden, millis ile)
+  if (calisiyor) {
+    uint32_t simdi = millis();
+    if (acik &amp;&amp; simdi - sonGecis &gt;= aktifSure) {
+      solenoidKapat(); sonGecis = simdi;
+      Serial.print(F("KAPALI ")); Serial.println(darbeNo);
+      if (darbeNo &gt;= aktifTekrar) { calisiyor = false; Serial.println(F("BITTI")); }
+    } else if (!acik &amp;&amp; simdi - sonGecis &gt;= ayar.aralikMs) {
+      darbeNo++; solenoidAc(); sonGecis = simdi;
+      Serial.print(F("ACIK ")); Serial.println(darbeNo);
+    }
+  }
+
+  // 4) Güvenlik: hiçbir durumda SURE_MAX_MS'den uzun açık kalmasın
+  if (acik &amp;&amp; millis() - sonGecis &gt; SURE_MAX_MS + 50) {
+    solenoidKapat(); calisiyor = false; Serial.println(F("IPTAL zaman asimi"));
+  }
+}
+</script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const LIM = { sureMin: 10, sureMax: 5000, aralikMin: 100, aralikMax: 60000, tekrarMax: 1000 };
+  const PRESETS = [20, 50, 100, 250, 500, 1000, 2000, 5000];
+
+  // ---------- storage (optional) ----------
+  const store = {
+    get() { try { return JSON.parse(localStorage.getItem('solenoid-ayar') || 'null'); } catch { return null; } },
+    set(v) { try { localStorage.setItem('solenoid-ayar', JSON.stringify(v)); } catch {} }
+  };
+
+  // ---------- log ----------
+  function log(dir, text) {
+    const el = $('log');
+    const t = new Date().toLocaleTimeString('tr-TR');
+    el.textContent += `${t} ${dir} ${text}\n`;
+    if (el.textContent.length > 20000) el.textContent = el.textContent.slice(-15000);
+    el.scrollTop = el.scrollHeight;
+  }
+  function msg(text, kind = '') { const m = $('msg'); m.textContent = text; m.className = 'msg ' + kind; }
+
+  // ---------- transport: real serial or demo ----------
+  let port = null, writer = null, reader = null, connected = false, demo = null;
+  let lineHandlers = [];
+  let rxBuf = '';
+
+  function onLine(line) {
+    line = line.trim(); if (!line) return;
+    log('←', line);
+    for (const h of [...lineHandlers]) h(line);
+    handleEvent(line);
+  }
+
+  async function sendLine(text) {
+    log('→', text);
+    if (demo) { demo.receive(text); return; }
+    if (!writer) throw new Error('Bağlı değil');
+    await writer.write(new TextEncoder().encode(text + '\n'));
+  }
+
+  function waitFor(pred, ms = 1500) {
+    return new Promise((resolve, reject) => {
+      const h = (line) => { if (pred(line)) { done(); resolve(line); } };
+      const t = setTimeout(() => { done(); reject(new Error('Arduino cevap vermedi')); }, ms);
+      function done() { clearTimeout(t); lineHandlers = lineHandlers.filter(x => x !== h); }
+      lineHandlers.push(h);
+    });
+  }
+
+  async function command(text, ms) {
+    const p = waitFor(l => /^(OK|HATA|DURUM|IPTAL|ACIK)\b/.test(l), ms);
+    await sendLine(text);
+    const r = await p;
+    if (r.startsWith('HATA')) throw new Error(r.replace(/^HATA\s*/, ''));
+    return r;
+  }
+
+  let keepReading = false, readDone = null, linking = false;
+
+  async function readLoop() {
+    const dec = new TextDecoder();
+    while (port && port.readable && keepReading) {
+      reader = port.readable.getReader();
+      try {
+        for (;;) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          rxBuf += dec.decode(value, { stream: true });
+          let i;
+          while ((i = rxBuf.indexOf('\n')) >= 0) { onLine(rxBuf.slice(0, i)); rxBuf = rxBuf.slice(i + 1); }
+        }
+      } catch (e) {
+        if (keepReading) log('!', 'Okuma hatası: ' + e.message);
+      } finally { try { reader.releaseLock(); } catch {} reader = null; }
+      if (keepReading) await new Promise(r => setTimeout(r, 50));
+    }
+    // Bağlantı biz istemeden koptuysa (kablo, reset, hata)
+    if (keepReading) { keepReading = false; await closePort(false); if (connected && !demo) setDisconnected('Bağlantı koptu, tekrar bağlanın'); }
+  }
+
+  // Portu düzgün kapat: önce okuyucuyu bırak, okuma döngüsünün bitmesini bekle, sonra kapat
+  async function closePort(waitLoop = true) {
+    keepReading = false;
+    try { if (reader) await reader.cancel(); } catch {}
+    if (waitLoop && readDone) { try { await Promise.race([readDone, new Promise(r => setTimeout(r, 1500))]); } catch {} }
+    try { if (writer) writer.releaseLock(); } catch {}
+    writer = null;
+    const p = port; port = null; rxBuf = '';
+    if (p) { try { await p.close(); } catch (e) { log('!', 'Port kapatılamadı: ' + e.message); } }
+  }
+
+  async function openPort(p) {
+    port = p;
+    try { await port.open({ baudRate: 115200 }); }
+    catch (e) {
+      // Önceki oturumdan açık kalmışsa kapatıp bir kez daha dene
+      if (e.name === 'InvalidStateError') { try { await port.close(); } catch {} await port.open({ baudRate: 115200 }); }
+      else throw e;
+    }
+    rxBuf = '';
+    writer = port.writable.getWriter();
+    keepReading = true;
+    readDone = readLoop();
+  }
+
+  async function connectSerial() {
+    if (!('serial' in navigator)) { $('banner').style.display = 'block'; return; }
+    if (linking) return;
+    linking = true; $('btnConnect').disabled = true;
+    try {
+      // Daha önce izin verilmiş port varsa listeyi tekrar sormadan onu kullan
+      let p = null;
+      try { const known = await navigator.serial.getPorts(); if (!forceChooser) p = known.includes(lastPort) ? lastPort : (known.length === 1 ? known[0] : null); } catch {}
+      if (!p) p = await navigator.serial.requestPort();
+      setPill('Bağlanıyor…', ''); msg('Bağlanıyor, Arduino yeniden başlıyor…', '');
+      await openPort(p);
+      // Mega port açılınca resetlenir; HAZIR mesajını bekle
+      try { await waitFor(l => l.startsWith('HAZIR'), 3000); } catch { /* reset olmayan kartlar için doğrudan sor */ }
+      let ok = false;
+      for (let i = 0; i < 3 && !ok; i++) {
+        try { applyDurum(await command('DURUM', 1200)); ok = true; } catch { await new Promise(r => setTimeout(r, 300)); }
+      }
+      if (!ok) {
+        await closePort();
+        forceChooser = true;
+        setDisconnected('Arduino cevap vermedi');
+        msg('Arduino cevap vermedi. Doğru portu seçtiğinizden ve kodun yüklü olduğundan emin olun. Tekrar Bağlan\'a basınca port listesi açılacak.', 'err');
+        return;
+      }
+      forceChooser = false; lastPort = port;
+      await afterConnect('Arduino bağlı', true);
+    } catch (e) {
+      if (e.name !== 'NotFoundError') {
+        const busy = /open|kullan|busy|access/i.test(e.message);
+        msg(busy ? 'Port açılamadı: başka bir program (ör. Arduino IDE Seri Port Ekranı) kullanıyor olabilir. Onu kapatıp tekrar deneyin.' : 'Bağlanamadı: ' + e.message, 'err');
+        forceChooser = true;
+      }
+      await closePort();
+      if (!connected) setDisconnected();
+    } finally { linking = false; $('btnConnect').disabled = false; }
+  }
+  let forceChooser = false, lastPort = null;
+
+  async function disconnectSerial(silent) {
+    if (linking) return;
+    linking = true; $('btnConnect').disabled = true;
+    // Güvenlik: kesmeden önce solenoidi bırak
+    if (running && writer) { try { await sendLine('DURDUR'); await new Promise(r => setTimeout(r, 100)); } catch {} }
+    connected = false;
+    await closePort();
+    linking = false; $('btnConnect').disabled = false;
+    if (!silent) { setDisconnected('Bağlantı kesildi'); msg('Bağlantı kesildi, port serbest.', 'ok'); }
+  }
+
+  async function afterConnect(label, durumOkundu) {
+    connected = true;
+    setPill(label, demo ? 'demo' : 'ok');
+    $('btnConnect').textContent = 'Bağlantıyı kes';
+    $('btnDemo').disabled = true;
+    try {
+      if (!durumOkundu) applyDurum(await command('DURUM', 2000));
+      msg(`Bağlandı. Buton: ${ard.bsure} ms · Arayüz: ${ard.sure} ms`, 'ok'); renderBChips();
+    } catch (e) { msg('Arduino\'dan durum okunamadı: ' + e.message, 'err'); }
+    setIdle();
+    refreshButtons();
+  }
+
+  function setDisconnected(text) {
+    clearTimeout(syncT); bMark('Değiştirmek için bağlanın.', '');
+    connected = false; demo = null; running = false;
+    setPill('Bağlı değil', '');
+    $('btnConnect').textContent = "Arduino'ya bağlan";
+    $('btnDemo').disabled = false;
+    lamp(false); heroState('', 'Bağlı değil', text || 'Önce Arduino\'ya bağlanın');
+    refreshButtons();
+  }
+
+  function setPill(text, cls) { $('pillText').textContent = text; $('pill').className = 'pill ' + cls; }
+
+  // ---------- demo Arduino ----------
+  function makeDemo() {
+    const st = { sure: 50, tekrar: 1, aralik: 1000, bsure: 50, cs: 50, ct: 1, calisiyor: false, acik: false, n: 0, timer: null };
+    const out = (l) => setTimeout(() => onLine(l), 5);
+    const durum = () => `DURUM sure=${st.sure} tekrar=${st.tekrar} aralik=${st.aralik} bsure=${st.bsure} calisiyor=${st.calisiyor ? 1 : 0} acik=${st.acik ? 1 : 0} min=${LIM.sureMin} max=${LIM.sureMax} aralikmin=${LIM.aralikMin}`;
+    function stopAll() { clearTimeout(st.timer); st.calisiyor = false; st.acik = false; }
+    function on() { st.acik = true; out('ACIK ' + st.n); st.timer = setTimeout(off, st.cs); }
+    function off() { st.acik = false; out('KAPALI ' + st.n);
+      if (st.n >= st.ct) { st.calisiyor = false; out('BITTI'); } else { st.timer = setTimeout(() => { st.n++; on(); }, st.aralik); } }
+    window.__demoButon = () => { if (st.calisiyor) { stopAll(); out('IPTAL'); } else { out('BUTON'); st.cs = st.bsure; st.ct = 1; st.calisiyor = true; st.n = 1; on(); } };
+    return {
+      receive(cmd) {
+        const [k, a] = cmd.trim().toUpperCase().split(/\s+/); const v = Number(a);
+        if (k === 'BSURE') { if (!(v >= LIM.sureMin && v <= LIM.sureMax)) return out('HATA bsure'); st.bsure = v; out('OK bsure=' + v); }
+        else if (k === 'SURE') { if (!(v >= LIM.sureMin && v <= LIM.sureMax)) return out(`HATA sure ${LIM.sureMin}-${LIM.sureMax} ms arasinda olmali`); st.sure = v; out('OK sure=' + v); }
+        else if (k === 'TEKRAR') { if (!(v >= 1 && v <= LIM.tekrarMax)) return out('HATA tekrar 1-1000 arasinda olmali'); st.tekrar = v; out('OK tekrar=' + v); }
+        else if (k === 'ARALIK') { if (!(v >= LIM.aralikMin && v <= LIM.aralikMax)) return out('HATA aralik 100-60000 ms arasinda olmali'); st.aralik = v; out('OK aralik=' + v); }
+        else if (k === 'TETIKLE') { if (st.calisiyor) return out('HATA zaten calisiyor'); st.cs = st.sure; st.ct = st.tekrar; st.calisiyor = true; st.n = 1; on(); }
+        else if (k === 'DURDUR') { const v2 = st.calisiyor || st.acik; stopAll(); out(v2 ? 'IPTAL' : 'OK durdu'); }
+        else if (k === 'DURUM') out(durum());
+        else if (k === 'KAYDET') out('OK kaydedildi');
+        else out('HATA bilinmeyen komut');
+      }
+    };
+  }
+
+  // ---------- UI state ----------
+  let running = false, pulseStart = 0, pulseIdx = 0, totalPulses = 1, rafId = 0;
+  const ard = { sure: 50, tekrar: 1, aralik: 1000, bsure: 50 };
+  let aktif = { sure: 50, tekrar: 1 };   // Arduino'daki gerçek ayarlar
+  let kaynak = 'arayüz';
+
+  let pulseOn = false, sonMs = 0, userStop = null;
+  function backToReady() {
+    if (running || !connected) return;
+    heroState('ready', 'HAZIR', 'Solenoid bırakılmış durumda, tetiklemeye hazır');
+    const v = vals(); $('tSet').textContent = v.sure; showT(0, 'geçen süre');
+    $('barFill').style.width = '0'; $('cnt').textContent = `0 / ${v.tekrar}`;
+  }
+  function showT(ms, label) { $('tNow').textContent = Math.round(ms); if (label) $('tLbl').textContent = label; }
+  function lamp(on) { $('lamp').classList.toggle('on', on); }
+  let fadeT = 0;
+  function heroState(cls, main, sub) {
+    clearTimeout(fadeT);
+    $('hero').className = 'hero ' + cls;
+    if (main != null) $('stMain').textContent = main;
+    if (sub != null) $('stSub').textContent = sub;
+    document.title = cls === 'firing' ? '● TETİKLENDİ · Solenoid' : 'Solenoid Kontrol';
+  }
+  function setIdle() { running = false; lamp(false); heroState(connected ? 'ready' : '', connected ? 'HAZIR' : 'Bağlı değil', connected ? 'Solenoid bırakılmış durumda, tetiklemeye hazır' : 'Önce Arduino\'ya bağlanın'); $('barFill').style.width = '0'; refreshButtons(); }
+
+  function handleEvent(line) {
+    let m;
+    if ((m = line.match(/^OK (bsure|sure|tekrar|aralik)=(\d+)/))) { ard[m[1]] = +m[2]; return; }
+    if (line.startsWith('BUTON')) { kaynak = 'buton'; return; }
+    if ((m = line.match(/^ACIK (\d+)/))) {
+      if (+m[1] === 1) { aktif = kaynak === 'buton' ? { sure: ard.bsure, tekrar: 1 } : { sure: ard.sure, tekrar: ard.tekrar }; totalPulses = aktif.tekrar; }
+      running = true; pulseIdx = +m[1]; pulseStart = performance.now(); pulseOn = true;
+      $('tSet').textContent = aktif.sure; showT(0, 'geçen süre');
+      lamp(true); heroState('firing', 'TETİKLENDİ', `${kaynak === 'buton' ? 'Butonla tetiklendi' : 'Solenoid çekili'} · ${aktif.sure} ms`);
+      if (pulseIdx === 1) $('last').textContent = `Son tetikleme: ${new Date().toLocaleTimeString('tr-TR')} · ${aktif.sure} ms × ${totalPulses} · ${kaynak}`;
+      $('cnt').textContent = `${pulseIdx} / ${totalPulses}`;
+      cancelAnimationFrame(rafId); animate(); refreshButtons();
+    } else if ((m = line.match(/^KAPALI (\d+)/))) {
+      pulseOn = false; lamp(false); $('barFill').style.width = '100%'; showT(aktif.sure, `${pulseIdx}. darbe tamamlandı`);
+      if (pulseIdx < totalPulses) heroState('waiting', 'ARADA BEKLİYOR', `Sonraki darbe ${ard.aralik} ms sonra`);
+    } else if (line.startsWith('BITTI')) {
+      kaynak = 'arayüz'; setTimeout(syncSoon, 50);
+      setIdle(); showT(aktif.sure, 'çekili kaldı'); heroState('done', 'TAMAMLANDI', `${totalPulses} darbe × ${aktif.sure} ms, solenoid bırakıldı`);
+      fadeT = setTimeout(backToReady, 2500);
+    } else if (line.startsWith('IPTAL')) {
+      kaynak = 'arayüz'; setTimeout(syncSoon, 50);
+      const at = userStop ? userStop.at : cutAt(); userStop = null; setIdle(); heroState('stopped', 'DURDURULDU', line.includes('zaman') ? 'Güvenlik süresi aşıldı, solenoid bırakıldı' : stopText(at));
+      fadeT = setTimeout(backToReady, 2500);
+    } else if (line.startsWith('HAZIR') && connected) {
+      setIdle(); msg('Arduino yeniden başladı.', '');
+    }
+  }
+
+  function animate() {
+    const d = aktif.sure;
+    const p = Math.min(1, (performance.now() - pulseStart) / d);
+    $('barFill').style.width = (p * 100) + '%';
+    if (pulseOn) showT(Math.min(d, performance.now() - pulseStart));
+    if (p < 1 && $('hero').classList.contains('firing')) rafId = requestAnimationFrame(animate);
+  }
+
+  function applyDurum(line) {
+    const g = (k) => { const m = line.match(new RegExp(k + '=(\\d+)')); return m ? +m[1] : null; };
+    if (g('min')) LIM.sureMin = g('min');
+    if (g('max')) LIM.sureMax = g('max');
+    if (g('aralikmin')) LIM.aralikMin = g('aralikmin');
+    applyLimits();
+    for (const k of ['sure', 'tekrar', 'aralik', 'bsure']) if (g(k)) ard[k] = g(k);
+    if (g('bsure')) { $('bsure').value = g('bsure'); bMark('Değişiklik otomatik kaydedilir.', ''); renderBChips(); }
+    if (g('sure')) setSure(g('sure'));
+    if (g('tekrar')) $('tekrar').value = g('tekrar');
+    if (g('aralik')) $('aralik').value = g('aralik');
+    if (g('calisiyor') === 1) { running = true; refreshButtons(); }
+    onInputs();
+  }
+
+  function applyLimits() {
+    for (const el of [$('sure'), $('sureRange')]) { el.min = LIM.sureMin; el.max = LIM.sureMax; }
+    $('aralik').min = LIM.aralikMin;
+    $('minLbl').textContent = LIM.sureMin + ' ms'; $('maxLbl').textContent = LIM.sureMax + ' ms';
+    renderChips();
+  }
+
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  function vals() {
+    return {
+      sure: clamp(Math.round(+$('sure').value || LIM.sureMin), LIM.sureMin, LIM.sureMax),
+      tekrar: clamp(Math.round(+$('tekrar').value || 1), 1, LIM.tekrarMax),
+      aralik: clamp(Math.round(+$('aralik').value || LIM.aralikMin), LIM.aralikMin, LIM.aralikMax),
+    };
+  }
+  function setSure(v) { $('sure').value = v; $('sureRange').value = v; onInputs(); }
+
+  function renderChips() {
+    const c = $('chips'); c.innerHTML = '';
+    for (const p of PRESETS.filter(p => p >= LIM.sureMin && p <= LIM.sureMax)) {
+      const b = document.createElement('button');
+      b.textContent = p >= 1000 ? (p / 1000).toLocaleString('tr-TR') + ' s' : p + ' ms';
+      b.dataset.v = p; b.onclick = () => setSure(p);
+      c.appendChild(b);
+    }
+  }
+
+  function onInputs() {
+    const v = vals();
+    $('sureSec').textContent = '= ' + (v.sure / 1000).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' saniye';
+    for (const b of $('chips').children) b.classList.toggle('on', +b.dataset.v === +$('sure').value);
+    const single = v.tekrar <= 1;
+    $('aralik').disabled = single;
+    $('aralikHint').textContent = single ? 'Tek darbede kullanılmaz' : `Toplam ≈ ${((v.tekrar * v.sure + (v.tekrar - 1) * v.aralik) / 1000).toLocaleString('tr-TR', { maximumFractionDigits: 2 })} saniye`;
+    if (!running) { $('cnt').textContent = `0 / ${v.tekrar}`; $('tSet').textContent = v.sure; if (!pulseOn && !$('hero').className.match(/done|stopped/)) showT(0, 'geçen süre'); }
+    store.set(v);
+  }
+
+  function normalize(el, min, max) {
+    let v = Math.round(+el.value);
+    if (!Number.isFinite(v) || el.value === '') v = min;
+    const c = clamp(v, min, max);
+    if (c !== v) msg(`Değer ${min}–${max} aralığına çekildi.`, '');
+    el.value = c;
+  }
+
+  function refreshButtons() {
+    $('btnFire').disabled = !connected || running;
+    $('btnStop').disabled = !connected || !(running || busy);
+    $('bsure').disabled = !connected; $('bsureRange').disabled = !connected; for (const b of $('bchips').children) b.disabled = !connected;
+  }
+
+  // ---------- actions ----------
+  let busy = false;
+  async function fire() {
+    if (!connected || running || busy) return;
+    busy = true; refreshButtons();
+    normalize($('sure'), LIM.sureMin, LIM.sureMax); normalize($('tekrar'), 1, LIM.tekrarMax); normalize($('aralik'), LIM.aralikMin, LIM.aralikMax);
+    $('sureRange').value = $('sure').value; onInputs();
+    const v = vals(); totalPulses = v.tekrar; kaynak = 'arayüz';
+    try {
+      await command('SURE ' + v.sure);
+      await command('TEKRAR ' + v.tekrar);
+      await command('ARALIK ' + v.aralik);
+      await command('TETIKLE');
+      running = true;
+      msg('');
+    } catch (e) { msg('Hata: ' + e.message, 'err'); }
+    busy = false; refreshButtons();
+  }
+
+  function cutAt() { if (pulseOn) { sonMs = Math.min(aktif.sure, performance.now() - pulseStart); pulseOn = false; showT(sonMs, 'bu ms\'de durdu'); return sonMs; } return null; }
+  function stopText(at) { return at != null ? `${pulseIdx}. darbe ${Math.round(at)} ms'de kesildi, solenoid bırakıldı` : 'Darbe arasında durduruldu, solenoid bırakıldı'; }
+  async function stop() {
+    if (!connected || !(running || busy)) return;
+    const at = cutAt(); const wasFiring = at != null; userStop = { at };
+    try { await command('DURDUR'); } catch (e) { msg('Hata: ' + e.message, 'err'); }
+    userStop = null;
+    if (!$('hero').classList.contains('stopped')) { setIdle(); heroState('stopped', 'DURDURULDU', stopText(wasFiring ? at : null)); fadeT = setTimeout(backToReady, 2500); }
+  }
+
+  // Buton süresi değişince Arduino'ya otomatik gönder (Arduino kalıcı kaydeder)
+  let syncT = 0, syncing = false;
+  function bMark(t, cls) { $('bMsg').textContent = t; $('bMsg').className = 'hint ' + cls; }
+  function bVal() { return clamp(Math.round(+$('bsure').value || LIM.sureMin), LIM.sureMin, LIM.sureMax); }
+  function syncSoon() { clearTimeout(syncT); if (connected && bVal() !== ard.bsure) bMark('Kaydediliyor…', ''); syncT = setTimeout(syncSettings, 600); }
+  async function syncSettings() {
+    if (!connected) return;
+    if (running || busy || syncing) { syncT = setTimeout(syncSettings, 300); return; }
+    const v = bVal();
+    if (v === ard.bsure) return;
+    syncing = true;
+    if (!running) { $('bigVal').innerHTML = `${v} <small>ms</small>`; heroState('saving', 'Kaydediliyor…', 'Fiziksel buton süresi Arduino\'ya yazılıyor'); }
+    try {
+      await command('BSURE ' + v); bMark(`✓ Arduino'ya kaydedildi`, 'ok'); msg('');
+      if (!running) {
+        $('bigVal').innerHTML = `${ard.bsure} <small>ms</small>`;
+        heroState('saved', '✓ BUTON SÜRESİ KAYDEDİLDİ', 'Butona basınca artık bu süre kadar çekecek');
+        fadeT = setTimeout(backToReady, 3000);
+      }
+    }
+    catch (e) {
+      bMark('Kaydedilemedi: ' + e.message, 'err');
+      if (!running) { heroState('stopped', 'KAYDEDİLEMEDİ', 'Buton süresi değişmedi: ' + e.message); fadeT = setTimeout(backToReady, 3500); }
+    }
+    syncing = false;
+    if (bVal() !== ard.bsure) syncSoon();
+  }
+  function renderBChips() {
+    const c = $('bchips'); c.innerHTML = '';
+    for (const p of PRESETS.filter(p => p >= LIM.sureMin && p <= LIM.sureMax)) {
+      const b = document.createElement('button');
+      b.textContent = p >= 1000 ? (p / 1000).toLocaleString('tr-TR') + ' s' : p + ' ms';
+      b.dataset.v = p; b.disabled = !connected;
+      b.classList.toggle('on', p === bVal());
+      b.onclick = () => { $('bsure').value = p; renderBChips(); syncSoon(); };
+      c.appendChild(b);
+    }
+    $('bsureRange').value = bVal(); $('bsureRange').min = LIM.sureMin; $('bsureRange').max = LIM.sureMax;
+    $('bsureSec').textContent = '= ' + (bVal() / 1000).toLocaleString('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' saniye';
+  }
+
+  // ---------- wiring ----------
+  $('sure').addEventListener('input', () => { $('sureRange').value = $('sure').value; onInputs(); });
+  $('sure').addEventListener('change', () => { normalize($('sure'), LIM.sureMin, LIM.sureMax); $('sureRange').value = $('sure').value; onInputs(); });
+  $('sureRange').addEventListener('input', () => { $('sure').value = $('sureRange').value; onInputs(); });
+  $('tekrar').addEventListener('input', onInputs);
+  $('tekrar').addEventListener('change', () => { normalize($('tekrar'), 1, LIM.tekrarMax); onInputs(); });
+  $('aralik').addEventListener('input', onInputs);
+  $('aralik').addEventListener('change', () => { normalize($('aralik'), LIM.aralikMin, LIM.aralikMax); onInputs(); });
+  $('tMinus').onclick = () => { $('tekrar').value = Math.max(1, vals().tekrar - 1); onInputs(); };
+  $('tPlus').onclick = () => { $('tekrar').value = Math.min(LIM.tekrarMax, vals().tekrar + 1); onInputs(); };
+  $('bsure').addEventListener('input', () => { renderBChips(); syncSoon(); });
+  $('bsureRange').addEventListener('input', () => { $('bsure').value = $('bsureRange').value; renderBChips(); syncSoon(); });
+  $('bsure').addEventListener('change', () => { normalize($('bsure'), LIM.sureMin, LIM.sureMax); renderBChips(); syncSoon(); });
+  $('btnFire').onclick = fire;
+  $('btnStop').onclick = stop;
+  $('btnConnect').onclick = () => connected ? (demo ? setDisconnected('Demo kapatıldı') : disconnectSerial()) : connectSerial();
+  $('btnDemo').onclick = () => { demo = makeDemo(); afterConnect('Demo modu'); };
+  // ---------- Arduino kodu ----------
+  const inoTxt = (() => { const t = document.createElement('textarea'); t.innerHTML = $('inoSrc').textContent; return t.value; })();
+  $('codeBox').textContent = inoTxt;
+  $('btnCode').onclick = () => $('codeDlg').showModal();
+  $('codeClose').onclick = () => $('codeDlg').close();
+  $('codeDlg').addEventListener('click', (e) => { if (e.target === $('codeDlg')) $('codeDlg').close(); });
+  $('codeCopy').onclick = async () => {
+    try { await navigator.clipboard.writeText(inoTxt); }
+    catch { const r = document.createRange(); r.selectNodeContents($('codeBox')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand('copy'); }
+    $('codeCopy').textContent = 'Kopyalandı ✓'; setTimeout(() => $('codeCopy').textContent = 'Kopyala', 1500);
+  };
+  $('codeDl').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([inoTxt], { type: 'text/plain' })); a.download = 'solenoid_kontrol.ino'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
+
+  document.addEventListener('keydown', (e) => {
+    if ($('codeDlg').open) { if (e.key === 'Escape') stop(); return; }
+    const typing = e.target.tagName === 'INPUT' && e.target.type !== 'range';
+    if (e.key === 'Escape') { e.preventDefault(); stop(); }
+    else if (e.code === 'Space' && !typing && e.target.tagName !== 'BUTTON') { e.preventDefault(); fire(); }
+  });
+  if ('serial' in navigator) {
+    navigator.serial.addEventListener('disconnect', async (e) => { if (port && e.target === port) { connected = false; await closePort(); setDisconnected('USB kablosu çıkarıldı'); msg('USB kablosu çıkarıldı. Takıp tekrar bağlanın.', 'err'); } });
+  } else { $('banner').style.display = 'block'; }
+
+  // ---------- init ----------
+  applyLimits();
+  const saved = store.get();
+  if (saved) { $('sure').value = saved.sure; $('sureRange').value = saved.sure; $('tekrar').value = saved.tekrar; $('aralik').value = saved.aralik; }
+  onInputs(); renderBChips(); refreshButtons();
+})();
+</script>
+</body>
+</html>
